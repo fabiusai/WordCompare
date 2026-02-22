@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Diff Generator</title>
+    <title>Word Diff Playground Pro</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/7.0.0/diff.min.js"></script>
@@ -11,128 +11,243 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
+        /* Palette stile Apple / Minimal */
         :root {
-            --primary-color: #0056b3;
-            --bg-color: #f4f7f6;
-            --box-bg: #ffffff;
-            --text-color: #333333;
+            --bg-color: #F5F5F7;
+            --surface: #FFFFFF;
+            --text-main: #1D1D1F;
+            --text-secondary: #86868B;
+            --accent: #0071E3;
+            --accent-hover: #0077ED;
+            --add-color: #10B981; 
+            --del-color: #EF4444; 
+            --border: #E5E7EB;
         }
-        
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 40px 20px;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- TOOLBAR --- */
+        .toolbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 16px 40px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
         }
 
-        .container {
-            background-color: var(--box-bg);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            max-width: 600px;
-            width: 100%;
+        .controls-group {
+            display: flex;
+            gap: 24px;
+            align-items: flex-end;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 10px;
+        .file-input {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
-        p.desc {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .file-group {
-            margin-bottom: 25px;
-        }
-
-        .file-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
+        .file-input label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: -0.2px;
         }
 
         input[type="file"] {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            border: 1px dashed #ccc;
-            border-radius: 5px;
-            background-color: #fafafa;
-            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text-main);
         }
 
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--primary-color);
+        .btn {
+            background-color: var(--accent);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #004494;
-        }
-
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        #status {
-            margin-top: 20px;
-            text-align: center;
-            font-weight: bold;
+            border-radius: 8px;
+            padding: 10px 20px;
             font-size: 14px;
-            color: #d9534f;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
         }
 
-        .success {
-            color: #5cb85c !important;
+        .btn:hover { background-color: var(--accent-hover); }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { background-color: #A1A1A6; cursor: not-allowed; transform: none; }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
         }
+        .btn-outline:hover { background-color: rgba(0, 113, 227, 0.05); }
+
+        #exportBtn { display: none; }
+
+        /* --- PLAYGROUND AREA --- */
+        .workspace {
+            margin-top: 90px;
+            padding: 20px 40px 60px 40px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .summary-bar {
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .pane-headers {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .pane-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+            padding-left: 10px;
+        }
+
+        /* --- UI CARDS --- */
+        .diff-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+            align-items: stretch; 
+        }
+
+        .card {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 15px;
+            line-height: 1.6;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            /* LA SOLUZIONE AL PROBLEMA DEGLI SPAZI E' QUI: */
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Solo 8px di distanza tra Etichetta e Testo */
+        }
+
+        .card.empty {
+            background: transparent;
+            box-shadow: none;
+            border: 2px dashed #D1D5DB;
+            opacity: 0.6;
+        }
+
+        .card.added { border-left: 4px solid var(--add-color); }
+        .card.removed { border-left: 4px solid var(--del-color); }
+
+        .card.removed .text-content {
+            text-decoration: line-through;
+            color: #6B7280; 
+        }
+
+        .card.equal { color: #374151; }
+
+        .status-badge {
+            align-self: flex-start; /* Evita che si dilati */
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge-added { color: var(--add-color); }
+        .badge-removed { color: var(--del-color); }
+
+        /* Questa classe ora gestisce in esclusiva il pre-wrap del testo */
+        .text-content {
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+        }
+
+        /* --- PULSANTE COPIA --- */
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .card.added:hover .copy-btn { opacity: 1; }
+        .copy-btn:hover { background: #F3F4F6; }
+        .copy-btn:active { transform: scale(0.95); }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Analizzatore Modifiche Word</h1>
-        <p class="desc">Carica il documento originale e quello modificato. L'app creerà un nuovo file Word con il nuovo testo a sinistra e le modifiche a destra.</p>
-
-        <div class="file-group">
-            <label for="fileOriginale">1. Documento Originale (.docx)</label>
-            <input type="file" id="fileOriginale" accept=".docx">
+    <div class="toolbar">
+        <div class="controls-group">
+            <div class="file-input">
+                <label for="fileOriginale">Versione Originale</label>
+                <input type="file" id="fileOriginale" accept=".docx">
+            </div>
+            <div class="file-input">
+                <label for="fileModificato">Versione Modificata</label>
+                <input type="file" id="fileModificato" accept=".docx">
+            </div>
+            <button id="btnGenera" class="btn" onclick="processFiles()">Analizza Testi</button>
         </div>
-
-        <div class="file-group">
-            <label for="fileModificato">2. Documento Modificato (.docx)</label>
-            <input type="file" id="fileModificato" accept=".docx">
+        <div class="controls-group">
+            <button id="exportBtn" class="btn btn-outline" onclick="esportaWord()">Esporta Word (.docx)</button>
         </div>
+    </div>
 
-        <button id="btnGenera" onclick="processFiles()">Confronta e Genera Word</button>
-        <div id="status"></div>
+    <div class="workspace">
+        <div id="summaryBar" class="summary-bar"></div>
+        <div class="pane-headers" id="headers" style="display: none;">
+            <div class="pane-title">Documento Originale</div>
+            <div class="pane-title">Nuova Versione</div>
+        </div>
+        <div id="diffContainer"></div>
     </div>
 
     <script>
-        // Funzione per estrarre il testo da un file Word tramite Mammoth.js
+        let differenzeGlobali = null;
+
         function extractTextFromFile(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const arrayBuffer = event.target.result;
-                    mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                    mammoth.extractRawText({ arrayBuffer: event.target.result })
                         .then(result => resolve(result.value))
                         .catch(err => reject(err));
                 };
@@ -140,142 +255,213 @@
             });
         }
 
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function copiaTesto(buttonElement) {
+            const textToCopy = buttonElement.parentElement.querySelector('.text-content').innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                buttonElement.innerText = "Copiato!";
+                buttonElement.style.color = "var(--add-color)";
+                setTimeout(() => {
+                    buttonElement.innerText = "Copia";
+                    buttonElement.style.color = "var(--text-main)";
+                }, 2000);
+            });
+        }
+
         async function processFiles() {
             const fileOriginale = document.getElementById('fileOriginale').files[0];
             const fileModificato = document.getElementById('fileModificato').files[0];
-            const statusDiv = document.getElementById('status');
             const btnGenera = document.getElementById('btnGenera');
+            const exportBtn = document.getElementById('exportBtn');
+            const diffContainer = document.getElementById('diffContainer');
+            const headers = document.getElementById('headers');
+            const summaryBar = document.getElementById('summaryBar');
 
             if (!fileOriginale || !fileModificato) {
-                statusDiv.innerText = "Per favore, carica entrambi i documenti.";
-                statusDiv.className = "";
+                alert("Per favore, carica entrambi i documenti.");
                 return;
             }
 
             try {
                 btnGenera.disabled = true;
-                statusDiv.innerText = "Estrazione del testo in corso...";
-                statusDiv.className = "";
+                btnGenera.innerText = "Analisi in corso...";
 
-                // 1. Estrai il testo dai due documenti
                 const testoOriginale = await extractTextFromFile(fileOriginale);
                 const testoModificato = await extractTextFromFile(fileModificato);
 
-                statusDiv.innerText = "Confronto dei testi in corso...";
+                let differenzeGrezze = Diff.diffLines(testoOriginale, testoModificato);
 
-                // 2. Confronta i paragrafi (linee)
-                const differenze = Diff.diffLines(testoOriginale, testoModificato);
+                // --- 1. ACCORPAMENTO BLOCCHI ---
+                let differenzeAccorpate = [];
+                
+                differenzeGrezze.forEach(parte => {
+                    let tipoCorrente = parte.added ? 'added' : (parte.removed ? 'removed' : 'equal');
+                    let ultimoBlocco = differenzeAccorpate[differenzeAccorpate.length - 1];
 
-                statusDiv.innerText = "Generazione del nuovo file Word...";
+                    if (ultimoBlocco && tipoCorrente === 'equal' && parte.value.trim() === '') {
+                        ultimoBlocco.value += parte.value;
+                    }
+                    else if (ultimoBlocco && ultimoBlocco.type === tipoCorrente) {
+                        ultimoBlocco.value += parte.value;
+                    }
+                    else {
+                        differenzeAccorpate.push({ type: tipoCorrente, value: parte.value, added: parte.added, removed: parte.removed });
+                    }
+                });
 
-                // 3. Prepara la libreria Docx
+                // --- 2. PULIZIA ESTREMA E INFALLIBILE ---
+                differenzeGlobali = differenzeAccorpate.map(blocco => {
+                    let t = blocco.value;
+                    
+                    t = t.replace(/[\u200B-\u200D\uFEFF\x0B\x0C\u00A0]/g, ' ');
+                    
+                    let righe = t.split('\n').map(riga => riga.trim());
+                    
+                    // Rimuove qualsiasi riga vuota all'inizio e alla fine dell'array
+                    while(righe.length > 0 && righe[0] === '') righe.shift();
+                    while(righe.length > 0 && righe[righe.length - 1] === '') righe.pop();
+                    
+                    t = righe.join('\n');
+                    t = t.replace(/\n{3,}/g, '\n\n');
+                    t = t.trim();
+                    
+                    return { ...blocco, value: t };
+                }).filter(blocco => blocco.value !== ''); 
+
+                let aggiunte = differenzeGlobali.filter(d => d.added).length;
+                let rimozioni = differenzeGlobali.filter(d => d.removed).length;
+                summaryBar.innerText = `Analisi completata: ${aggiunte} aggiunte e ${rimozioni} rimozioni.`;
+
+                // --- 3. GENERAZIONE HTML ---
+                let htmlOutput = "";
+
+                differenzeGlobali.forEach(parte => {
+                    let testoSicuro = escapeHtml(parte.value);
+
+                    if (parte.added) {
+                        htmlOutput += `
+                            <div class="diff-row">
+                                <div class="card empty"></div>
+                                <div class="card added">
+                                    <div class="status-badge badge-added">Aggiunto</div>
+                                    <div class="text-content">${testoSicuro}</div>
+                                    <button class="copy-btn" onclick="copiaTesto(this)">Copia</button>
+                                </div>
+                            </div>`;
+                    } else if (parte.removed) {
+                        htmlOutput += `
+                            <div class="diff-row">
+                                <div class="card removed">
+                                    <div class="status-badge badge-removed">Rimosso</div>
+                                    <div class="text-content">${testoSicuro}</div>
+                                </div>
+                                <div class="card empty"></div>
+                            </div>`;
+                    } else {
+                        htmlOutput += `
+                            <div class="diff-row">
+                                <div class="card equal"><div class="text-content">${testoSicuro}</div></div>
+                                <div class="card equal"><div class="text-content">${testoSicuro}</div></div>
+                            </div>`;
+                    }
+                });
+
+                diffContainer.innerHTML = htmlOutput;
+                headers.style.display = "flex";
+                summaryBar.style.display = "block";
+                exportBtn.style.display = "block";
+
+            } catch (error) {
+                console.error(error);
+                alert("Si è verificato un errore durante l'elaborazione.");
+            } finally {
+                btnGenera.disabled = false;
+                btnGenera.innerText = "Analizza Testi";
+            }
+        }
+
+        async function esportaWord() {
+            if (!differenzeGlobali) return;
+
+            try {
+                const exportBtn = document.getElementById('exportBtn');
+                exportBtn.innerText = "Creazione in corso...";
+                exportBtn.disabled = true;
+
                 const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
-
                 const righeTabella = [];
 
-                // Aggiungi l'intestazione della tabella
                 righeTabella.push(
                     new TableRow({
                         children: [
                             new TableCell({
                                 width: { size: 70, type: WidthType.PERCENTAGE },
                                 margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                children: [new Paragraph({ children: [new TextRun({ text: "Nuovo Testo", bold: true, size: 24 })] })] // size: 24 = 12pt
+                                children: [new Paragraph({ children: [new TextRun({ text: "Nuovo Testo", bold: true, size: 24 })] })]
                             }),
                             new TableCell({
                                 width: { size: 30, type: WidthType.PERCENTAGE },
                                 margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                children: [new Paragraph({ children: [new TextRun({ text: "Modifiche Effettuate", bold: true, size: 18 })] })] // size: 18 = 9pt
+                                children: [new Paragraph({ children: [new TextRun({ text: "Modifiche", bold: true, size: 18 })] })]
                             })
                         ]
                     })
                 );
 
-                // Analizza le differenze e costruisci le righe
-                differenze.forEach(parte => {
-                    // Dividi la parte in righe per evitare blocchi enormi e pulisci le righe vuote
-                    let linee = parte.value.split('\n').filter(l => l.trim() !== '');
-                    if (linee.length === 0) return;
+                differenzeGlobali.forEach(parte => {
+                    let lineeInterne = parte.value.split('\n');
+                    let colonnaSinistra = [];
+                    let colonnaDestra = [];
 
-                    linee.forEach(linea => {
-                        let testoColonna1 = "";
-                        let testoColonna2 = "";
-                        let coloreColonna2 = "000000";
+                    if (parte.added) {
+                        colonnaSinistra = lineeInterne.map(l => new Paragraph({ children: [new TextRun({ text: l, size: 24 })] }));
+                        colonnaDestra = [new Paragraph({ children: [new TextRun({ text: "Aggiunto", size: 16, color: "10B981", bold: true })] })];
+                    } else if (parte.removed) {
+                        colonnaSinistra = [new Paragraph("")];
+                        colonnaDestra = [new Paragraph({ children: [new TextRun({ text: "Rimosso:", size: 16, color: "EF4444", bold: true })] })]
+                                        .concat(lineeInterne.map(l => new Paragraph({ children: [new TextRun({ text: l, size: 16, color: "86868B", strike: true })] })));
+                    } else {
+                        colonnaSinistra = lineeInterne.map(l => new Paragraph({ children: [new TextRun({ text: l, size: 24 })] }));
+                        colonnaDestra = [new Paragraph("")];
+                    }
 
-                        if (parte.added) {
-                            testoColonna1 = linea;
-                            testoColonna2 = "Aggiunto";
-                            coloreColonna2 = "008000"; // Verde
-                        } else if (parte.removed) {
-                            testoColonna1 = ""; // Non c'è nel nuovo testo
-                            testoColonna2 = "Rimosso: " + linea;
-                            coloreColonna2 = "FF0000"; // Rosso
-                        } else {
-                            testoColonna1 = linea; // Testo rimasto uguale
-                            testoColonna2 = ""; 
-                        }
-
-                        // Creazione della riga
-                        righeTabella.push(
-                            new TableRow({
-                                children: [
-                                    new TableCell({
-                                        margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                        children: testoColonna1 ? [new Paragraph({
-                                            children: [new TextRun({ text: testoColonna1, size: 24 })] // Font normale (12pt)
-                                        })] : [new Paragraph("")]
-                                    }),
-                                    new TableCell({
-                                        margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                        children: testoColonna2 ? [new Paragraph({
-                                            children: [new TextRun({ 
-                                                text: testoColonna2, 
-                                                size: 16, // Font ridotto (8pt)
-                                                color: coloreColonna2,
-                                                italics: true
-                                            })]
-                                        })] : [new Paragraph("")]
-                                    })
-                                ]
-                            })
-                        );
-                    });
+                    righeTabella.push(
+                        new TableRow({
+                            children: [
+                                new TableCell({ margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: colonnaSinistra }),
+                                new TableCell({ margins: { top: 100, bottom: 100, left: 100, right: 100 }, children: colonnaDestra })
+                            ]
+                        })
+                    );
                 });
 
-                // 4. Crea la tabella (70% sinistra, 30% destra)
                 const tabella = new Table({
                     width: { size: 100, type: WidthType.PERCENTAGE },
                     rows: righeTabella,
-                    borders: { // Bordi leggeri per facilitare la lettura
-                        top: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
-                        bottom: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                    borders: { 
+                        top: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+                        bottom: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
                         left: { style: BorderStyle.NONE },
                         right: { style: BorderStyle.NONE },
-                        insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
-                        insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                        insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+                        insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
                     }
                 });
 
-                // 5. Crea il documento Word finale
-                const doc = new Document({
-                    sections: [{
-                        properties: {},
-                        children: [tabella]
-                    }]
-                });
-
-                // 6. Genera e scarica il file
+                const doc = new Document({ sections: [{ properties: {}, children: [tabella] }] });
                 const blob = await Packer.toBlob(doc);
                 saveAs(blob, "Documento_Confrontato.docx");
 
-                statusDiv.innerText = "Completato! Il file è stato scaricato.";
-                statusDiv.className = "success";
-
             } catch (error) {
                 console.error(error);
-                statusDiv.innerText = "Si è verificato un errore durante l'elaborazione dei file.";
+                alert("Errore durante la creazione del file Word.");
             } finally {
-                btnGenera.disabled = false;
+                const exportBtn = document.getElementById('exportBtn');
+                exportBtn.innerText = "Esporta Word (.docx)";
+                exportBtn.disabled = false;
             }
         }
     </script>

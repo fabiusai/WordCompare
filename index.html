@@ -3,505 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generatore Grafici</title>
-    <link rel="icon" href="favicon.ico">
+    <title>Word Diff Generator</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/7.0.0/diff.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <style>
         :root {
-            --color-blue: #1b47b4;
-            --color-yellow: #ffcc00;
-            --color-dark: #333;
-            --color-light: #fff;
-            --color-background: #f0f2f5;
-            --color-border: #ddd;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --border-radius: 8px;
+            --primary-color: #0056b3;
+            --bg-color: #f4f7f6;
+            --box-bg: #ffffff;
+            --text-color: #333333;
         }
-
-        @font-face {
-            font-family: 'Avenir Next LT Pro';
-            src: url('https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@4cac1a6/fonts/AvenirNextLTPro-Regular.woff2') format('woff2');
-            font-weight: normal;
-        }
-
+        
         body {
-            font-family: 'Avenir Next LT Pro', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
-            padding: 20px;
-            background-color: var(--color-background);
-            color: var(--color-dark);
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
         }
 
-        .app-container {
+        .container {
+            background-color: var(--box-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 600px;
             width: 100%;
-            max-width: 1100px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
         }
 
-        header {
+        h1 {
             text-align: center;
-            color: var(--color-blue);
+            font-size: 24px;
+            margin-bottom: 10px;
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-
-        .card {
-            background-color: var(--color-light);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 25px 30px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .card-header {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .card-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: var(--color-blue);
-        }
-        
-        .card-header p {
-            margin: 5px 0 0;
+        p.desc {
+            text-align: center;
+            font-size: 14px;
             color: #666;
-        }
-        
-        .controls-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        @media (min-width: 900px) {
-            .controls-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .file-group {
+            margin-bottom: 25px;
         }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-family: 'Avenir Next LT Pro', sans-serif;
-            font-size: 16px;
+        .file-group label {
+            display: block;
             font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            text-decoration: none;
-        }
-        
-        .btn svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .btn-primary {
-            background-color: var(--color-blue);
-            color: var(--color-light);
-        }
-        .btn-primary:hover:not(:disabled) {
-            filter: brightness(1.2);
-        }
-
-        .btn-yellow {
-            background-color: var(--color-yellow);
-            color: var(--color-dark);
-        }
-        .btn-yellow:hover:not(:disabled) {
-            filter: brightness(1.05);
-        }
-
-        .btn:active:not(:disabled) {
-            transform: scale(0.98);
-        }
-
-        .btn:disabled {
-            opacity: 0.7;
-            cursor: wait;
+            margin-bottom: 8px;
         }
 
         input[type="file"] {
-            display: none;
-        }
-
-        .file-upload-label {
             display: block;
-            text-align: center;
-            padding: 20px;
-            border: 2px dashed var(--color-border);
-            border-radius: var(--border-radius);
-            transition: background-color 0.2s;
-        }
-        .file-upload-label:hover {
-            background-color: #f9f9f9;
-            border-color: var(--color-blue);
+            width: 100%;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            background-color: #fafafa;
+            cursor: pointer;
         }
 
-        .chart-controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        .chart-container {
+        button:hover {
+            background-color: #004494;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #status {
             margin-top: 20px;
-            border: 1px solid var(--color-border);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            background-color: #fcfcfc;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #d9534f;
         }
 
-        .chart-container svg {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: auto;
+        .success {
+            color: #5cb85c !important;
         }
-
     </style>
 </head>
 <body>
 
-<main class="app-container">
-    <header>
-        <h1>Generatore di Grafici</h1>
-    </header>
+    <div class="container">
+        <h1>Analizzatore Modifiche Word</h1>
+        <p class="desc">Carica il documento originale e quello modificato. L'app creerà un nuovo file Word con il nuovo testo a sinistra e le modifiche a destra.</p>
 
-    <section class="card">
-        <div class="card-header">
-            <h2>1. Carica il tuo file</h2>
-            <p>Seleziona il file Excel (.xlsx). Per il grafico inferiore, puoi usare un asterisco (*) nella colonna "Argomento" per andare a capo manualmente.</p>
+        <div class="file-group">
+            <label for="fileOriginale">1. Documento Originale (.docx)</label>
+            <input type="file" id="fileOriginale" accept=".docx">
         </div>
-        <label for="fileInput" class="file-upload-label btn">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M3 17.25V6.75A2.25 2.25 0 015.25 4.5h13.5A2.25 2.25 0 0121 6.75v10.5A2.25 2.25 0 0118.75 19.5H5.25A2.25 2.25 0 013 17.25z" /></svg>
-            <span>Seleziona un file</span>
-        </label>
-        <input type="file" id="fileInput" accept=".xlsx, .xls">
-    </section>
 
-    <div class="controls-grid">
-        <section class="card">
-            <div class="card-header">
-                <h2>2. Grafico Superiore</h2>
-            </div>
-            <div class="chart-controls">
-                <button id="btn-gen1" class="btn btn-primary" onclick="generateChart1(this)">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg>
-                    <span>Genera</span>
-                </button>
-                <button id="btn-dl1" class="btn btn-yellow" onclick="downloadSvg('chart-container-1', 'grafico-superiore.svg')" style="display:none;">
-                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                    <span>Esporta SVG</span>
-                </button>
-            </div>
-            <div id="chart-container-1" class="chart-container"></div>
-        </section>
+        <div class="file-group">
+            <label for="fileModificato">2. Documento Modificato (.docx)</label>
+            <input type="file" id="fileModificato" accept=".docx">
+        </div>
 
-        <section class="card">
-            <div class="card-header">
-                <h2>3. Grafico Inferiore</h2>
-            </div>
-             <div class="chart-controls">
-                <button id="btn-gen2" class="btn btn-primary" onclick="generateChart2(this)">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg>
-                    <span>Genera</span>
-                </button>
-                <button id="btn-dl2" class="btn btn-yellow" onclick="downloadSvg('chart-container-2', 'grafico-inferiore.svg')" style="display:none;">
-                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                    <span>Esporta SVG</span>
-                </button>
-            </div>
-            <div id="chart-container-2" class="chart-container"></div>
-        </section>
+        <button id="btnGenera" onclick="processFiles()">Confronta e Genera Word</button>
+        <div id="status"></div>
     </div>
-</main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-<script>
-    // --- FUNZIONI COMUNI ---
-    async function handleButtonState(button, action) {
-        const originalContent = button.innerHTML;
-        button.innerHTML = `<span>Caricamento...</span>`;
-        button.disabled = true;
-
-        try {
-            await action();
-            button.innerHTML = `<span>Fatto!</span>`;
-            setTimeout(() => {
-                button.innerHTML = originalContent;
-                button.disabled = false;
-            }, 1500);
-        } catch (error) {
-            button.innerHTML = `<span>Errore!</span>`;
-            console.error(error);
-            alert(error.message);
-            setTimeout(() => {
-                button.innerHTML = originalContent;
-                button.disabled = false;
-            }, 2000);
-        }
-    }
-    
-    function formatNumber(num) {
-        const numericValue = Number(num);
-        if (isNaN(numericValue)) return num;
-
-        // Milioni (M): mantiene i decimali
-        if (numericValue >= 1000000) {
-            let formatted = (numericValue / 1000000).toFixed(2);
-            if (formatted.endsWith('.00')) {
-                formatted = (numericValue / 1000000).toFixed(0);
-            } else if (formatted.slice(-1) === '0') {
-                formatted = (numericValue / 1000000).toFixed(1);
-            }
-            return formatted.replace('.', ',') + 'M';
-        }
-        
-        // Migliaia (K): arrotonda all'intero, senza decimali
-        if (numericValue >= 1000) {
-            return Math.round(numericValue / 1000).toString() + 'K';
-        }
-
-        // Sotto 1000: nessun cambiamento
-        return numericValue.toString();
-    }
-
-    function downloadSvg(containerId, filename) {
-        const svg = document.querySelector(`#${containerId} svg`);
-        if (!svg) { alert("Nessun grafico da esportare."); return; }
-        const serializer = new XMLSerializer();
-        let source = serializer.serializeToString(svg);
-        const blob = new Blob([source], {type: 'image/svg+xml;charset=utf-8'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-    
-    function getWorkbook() {
-        return new Promise((resolve, reject) => {
-            const file = document.getElementById('fileInput').files[0];
-            if (!file) return reject(new Error("Per favore, seleziona un file Excel."));
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
-                    resolve(workbook);
-                } catch (err) {
-                    reject(new Error("Il file selezionato non è un file Excel valido."));
-                }
-            };
-            reader.onerror = () => reject(new Error("Errore durante la lettura del file."));
-            reader.readAsArrayBuffer(file);
-        });
-    }
-
-    // --- GRAFICO 1 ---
-    async function generateChart1(button) {
-        await handleButtonState(button, async () => {
-            const workbook = await getWorkbook();
-            const ws = workbook.Sheets[workbook.SheetNames[0]];
-            if(!ws) throw new Error("Il Foglio 1 non è stato trovato nel file.");
-            const json = XLSX.utils.sheet_to_json(ws, {header: 1});
-            const headers = ["Numero di post", "Visualizzazioni", "Interazioni", "Like e reazioni", "Condivisioni"];
-            const values = [];
-            for (let i = 1; i < json.length && values.length < headers.length; i++) {
-                if (json[i] && json[i][1] !== undefined) values.push(json[i][1]);
-            }
-            if (values.length < headers.length) throw new Error("Dati insufficienti trovati nel Foglio 1.");
-            createSvg1(headers, values);
-            document.getElementById('btn-dl1').style.display = 'inline-flex';
-        });
-    }
-
-    function createSvg1(headers, values) {
-        const container = document.getElementById('chart-container-1');
-        container.innerHTML = '';
-        const svgns = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgns, 'svg');
-        const svgWidth = 2156, svgHeight = 102;
-        svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
-        svg.style.fontFamily = "'Avenir Next LT Pro', sans-serif";
-        svg.style.backgroundColor = 'white';
-        const columnWidth = svgWidth / headers.length;
-        
-        const topLineY = 45;
-        const topLine = document.createElementNS(svgns, 'line');
-        topLine.setAttribute('x1', '0'); topLine.setAttribute('y1', topLineY); topLine.setAttribute('x2', svgWidth); topLine.setAttribute('y2', topLineY);
-        topLine.setAttribute('stroke', '#1b47b4'); topLine.setAttribute('stroke-width', '2');
-        svg.appendChild(topLine);
-
-        headers.forEach((header, i) => {
-            const xPos = columnWidth * i + columnWidth / 2;
-            const headerText = document.createElementNS(svgns, 'text');
-            headerText.setAttribute('x', xPos);
-            headerText.setAttribute('y', topLineY - 10);
-            headerText.setAttribute('text-anchor', 'middle');
-            headerText.setAttribute('dominant-baseline', 'alphabetic');
-            headerText.setAttribute('font-size', '34');
-            headerText.setAttribute('fill', '#1b47b4');
-            headerText.textContent = header;
-            svg.appendChild(headerText);
-            const valueText = document.createElementNS(svgns, 'text');
-            valueText.setAttribute('x', xPos);
-            valueText.setAttribute('y', topLineY + 35);
-            valueText.setAttribute('text-anchor', 'middle');
-            valueText.setAttribute('font-size', '34');
-            valueText.setAttribute('fill', '#000000');
-            valueText.textContent = formatNumber(values[i]);
-            svg.appendChild(valueText);
-        });
-
-        const bottomLine = document.createElementNS(svgns, 'line');
-        bottomLine.setAttribute('x1', '0'); bottomLine.setAttribute('y1', '95'); bottomLine.setAttribute('x2', svgWidth); bottomLine.setAttribute('y2', '95');
-        bottomLine.setAttribute('stroke', '#cccccc'); bottomLine.setAttribute('stroke-width', '1.5');
-        svg.appendChild(bottomLine);
-        container.appendChild(svg);
-    }
-
-    // --- GRAFICO 2 ---
-    async function generateChart2(button) {
-        await handleButtonState(button, async () => {
-            const workbook = await getWorkbook();
-            if (workbook.SheetNames.length < 2) throw new Error("Il file deve contenere almeno due fogli di lavoro.");
-            const ws = workbook.Sheets[workbook.SheetNames[1]];
-            if(!ws) throw new Error("Il Foglio 2 non è stato trovato nel file.");
-            const json = XLSX.utils.sheet_to_json(ws, {header: 1});
-            if (json.length < 1) throw new Error("Il Foglio 2 è vuoto.");
-            const headers = json[0];
-            const validDataRows = json.slice(1).filter(row => row && row.length > 0 && row[0]);
-            if (validDataRows.length === 0) throw new Error("Nessuna riga di dati valida trovata nel Foglio 2.");
-            createSvg2(headers, validDataRows);
-            document.getElementById('btn-dl2').style.display = 'inline-flex';
-        });
-    }
-
-    function createSvg2(headers, dataRows) {
-        const container = document.getElementById('chart-container-2');
-        container.innerHTML = '';
-        const svgns = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgns, 'svg');
-
-        const svgWidth = 2156, totalRows = 6, rowHeight = 135, svgHeight = totalRows * rowHeight;
-        svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
-        svg.style.fontFamily = "'Avenir Next LT Pro', sans-serif";
-        svg.style.backgroundColor = 'white';
-        
-        const leftMargin = 50, rightMargin = 50;
-        const contentWidth = svgWidth - leftMargin - rightMargin;
-        const imageColWidth = 350;
-        const dataAreaWidth = contentWidth - imageColWidth;
-        const dataColWidths = [ dataAreaWidth * 0.45, dataAreaWidth * 0.1375, dataAreaWidth * 0.1375, dataAreaWidth * 0.1375, dataAreaWidth * 0.1375 ];
-
-        let currentX = leftMargin + imageColWidth;
-        headers.forEach((header, i) => {
-            const headerText = document.createElementNS(svgns, 'text');
-            const colCenter = currentX + dataColWidths[i] / 2;
-            headerText.setAttribute('x', colCenter);
-            headerText.setAttribute('y', rowHeight - 10);
-            headerText.setAttribute('font-size', '34');
-            headerText.setAttribute('fill', '#1b47b4');
-            headerText.setAttribute('text-anchor', 'middle');
-            headerText.setAttribute('dominant-baseline', 'alphabetic');
-            headerText.textContent = header;
-            svg.appendChild(headerText);
-            currentX += dataColWidths[i];
-        });
-
-        const headerLine = document.createElementNS(svgns, 'line');
-        headerLine.setAttribute('x1', leftMargin); headerLine.setAttribute('y1', rowHeight);
-        headerLine.setAttribute('x2', svgWidth - rightMargin); headerLine.setAttribute('y2', rowHeight);
-        headerLine.setAttribute('stroke', '#1b47b4'); headerLine.setAttribute('stroke-width', '2');
-        svg.appendChild(headerLine);
-
-        dataRows.slice(0, 5).forEach((row, rowIndex) => {
-            const rowCenterY = rowHeight * (rowIndex + 1) + (rowHeight / 2);
-            currentX = leftMargin + imageColWidth;
-            row.forEach((cell, i) => {
-                const cellText = document.createElementNS(svgns, 'text');
-                const colCenter = currentX + dataColWidths[i] / 2;
-                cellText.setAttribute('x', colCenter);
-                cellText.setAttribute('font-size', '34');
-                cellText.setAttribute('fill', '#000');
-                cellText.setAttribute('text-anchor', 'middle');
-                
-                const yCorrection = 10;
-
-                if (i === 0) {
-                    const text = String(cell);
-                    let lines = [];
-
-                    if (text.includes('*')) {
-                        lines = text.split('*').map(t => t.trim());
-                    } else {
-                        const maxChars = 38;
-                        if (text.length > maxChars) {
-                            let breakPoint = text.lastIndexOf(' ', maxChars);
-                            if (breakPoint === -1 || breakPoint < text.length / 3) {
-                               breakPoint = text.indexOf(' ', Math.floor(text.length / 2));
-                               if (breakPoint === -1) breakPoint = maxChars;
-                            }
-                            lines = [text.substring(0, breakPoint).trim(), text.substring(breakPoint).trim()];
-                        } else {
-                            lines = [text];
-                        }
-                    }
-                    
-                    const lineHeight = 34 * 1.2;
-                    const initialY = rowCenterY - (lines.length - 1) * lineHeight / 2;
-                    cellText.setAttribute('y', initialY + yCorrection);
-                    cellText.setAttribute('dominant-baseline', 'middle');
-
-                    lines.forEach((line, lineIndex) => {
-                        const tspan = document.createElementNS(svgns, 'tspan');
-                        tspan.textContent = line;
-                        tspan.setAttribute('x', colCenter);
-                        if (lineIndex > 0) tspan.setAttribute('dy', '1.2em');
-                        cellText.appendChild(tspan);
-                    });
-
-                } else {
-                    cellText.setAttribute('y', rowCenterY + yCorrection);
-                    cellText.setAttribute('dominant-baseline', 'middle');
-                    cellText.textContent = formatNumber(cell);
-                }
-                
-                svg.appendChild(cellText);
-                currentX += dataColWidths[i];
+    <script>
+        // Funzione per estrarre il testo da un file Word tramite Mammoth.js
+        function extractTextFromFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const arrayBuffer = event.target.result;
+                    mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                        .then(result => resolve(result.value))
+                        .catch(err => reject(err));
+                };
+                reader.readAsArrayBuffer(file);
             });
+        }
 
-            const rowLine = document.createElementNS(svgns, 'line');
-            const lineY = rowHeight * (rowIndex + 2);
-            rowLine.setAttribute('x1', leftMargin); rowLine.setAttribute('y1', lineY);
-            rowLine.setAttribute('x2', svgWidth - rightMargin); rowLine.setAttribute('y2', lineY);
-            rowLine.setAttribute('stroke', '#cccccc');
-            rowLine.setAttribute('stroke-width', '1.5');
-            svg.appendChild(rowLine);
-        });
-        container.appendChild(svg);
-    }
-</script>
+        async function processFiles() {
+            const fileOriginale = document.getElementById('fileOriginale').files[0];
+            const fileModificato = document.getElementById('fileModificato').files[0];
+            const statusDiv = document.getElementById('status');
+            const btnGenera = document.getElementById('btnGenera');
+
+            if (!fileOriginale || !fileModificato) {
+                statusDiv.innerText = "Per favore, carica entrambi i documenti.";
+                statusDiv.className = "";
+                return;
+            }
+
+            try {
+                btnGenera.disabled = true;
+                statusDiv.innerText = "Estrazione del testo in corso...";
+                statusDiv.className = "";
+
+                // 1. Estrai il testo dai due documenti
+                const testoOriginale = await extractTextFromFile(fileOriginale);
+                const testoModificato = await extractTextFromFile(fileModificato);
+
+                statusDiv.innerText = "Confronto dei testi in corso...";
+
+                // 2. Confronta i paragrafi (linee)
+                const differenze = Diff.diffLines(testoOriginale, testoModificato);
+
+                statusDiv.innerText = "Generazione del nuovo file Word...";
+
+                // 3. Prepara la libreria Docx
+                const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
+
+                const righeTabella = [];
+
+                // Aggiungi l'intestazione della tabella
+                righeTabella.push(
+                    new TableRow({
+                        children: [
+                            new TableCell({
+                                width: { size: 70, type: WidthType.PERCENTAGE },
+                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                children: [new Paragraph({ children: [new TextRun({ text: "Nuovo Testo", bold: true, size: 24 })] })] // size: 24 = 12pt
+                            }),
+                            new TableCell({
+                                width: { size: 30, type: WidthType.PERCENTAGE },
+                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                children: [new Paragraph({ children: [new TextRun({ text: "Modifiche Effettuate", bold: true, size: 18 })] })] // size: 18 = 9pt
+                            })
+                        ]
+                    })
+                );
+
+                // Analizza le differenze e costruisci le righe
+                differenze.forEach(parte => {
+                    // Dividi la parte in righe per evitare blocchi enormi e pulisci le righe vuote
+                    let linee = parte.value.split('\n').filter(l => l.trim() !== '');
+                    if (linee.length === 0) return;
+
+                    linee.forEach(linea => {
+                        let testoColonna1 = "";
+                        let testoColonna2 = "";
+                        let coloreColonna2 = "000000";
+
+                        if (parte.added) {
+                            testoColonna1 = linea;
+                            testoColonna2 = "Aggiunto";
+                            coloreColonna2 = "008000"; // Verde
+                        } else if (parte.removed) {
+                            testoColonna1 = ""; // Non c'è nel nuovo testo
+                            testoColonna2 = "Rimosso: " + linea;
+                            coloreColonna2 = "FF0000"; // Rosso
+                        } else {
+                            testoColonna1 = linea; // Testo rimasto uguale
+                            testoColonna2 = ""; 
+                        }
+
+                        // Creazione della riga
+                        righeTabella.push(
+                            new TableRow({
+                                children: [
+                                    new TableCell({
+                                        margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                        children: testoColonna1 ? [new Paragraph({
+                                            children: [new TextRun({ text: testoColonna1, size: 24 })] // Font normale (12pt)
+                                        })] : [new Paragraph("")]
+                                    }),
+                                    new TableCell({
+                                        margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                        children: testoColonna2 ? [new Paragraph({
+                                            children: [new TextRun({ 
+                                                text: testoColonna2, 
+                                                size: 16, // Font ridotto (8pt)
+                                                color: coloreColonna2,
+                                                italics: true
+                                            })]
+                                        })] : [new Paragraph("")]
+                                    })
+                                ]
+                            })
+                        );
+                    });
+                });
+
+                // 4. Crea la tabella (70% sinistra, 30% destra)
+                const tabella = new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    rows: righeTabella,
+                    borders: { // Bordi leggeri per facilitare la lettura
+                        top: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                        bottom: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                        left: { style: BorderStyle.NONE },
+                        right: { style: BorderStyle.NONE },
+                        insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                        insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                    }
+                });
+
+                // 5. Crea il documento Word finale
+                const doc = new Document({
+                    sections: [{
+                        properties: {},
+                        children: [tabella]
+                    }]
+                });
+
+                // 6. Genera e scarica il file
+                const blob = await Packer.toBlob(doc);
+                saveAs(blob, "Documento_Confrontato.docx");
+
+                statusDiv.innerText = "Completato! Il file è stato scaricato.";
+                statusDiv.className = "success";
+
+            } catch (error) {
+                console.error(error);
+                statusDiv.innerText = "Si è verificato un errore durante l'elaborazione dei file.";
+            } finally {
+                btnGenera.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>

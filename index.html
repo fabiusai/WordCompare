@@ -12,24 +12,24 @@
 
     <style>
         :root {
-            --bg-color: #F5F5F7;
+            --bg-workspace: #E5E7EB; /* Sfondo scuro per far risaltare il foglio */
             --surface: #FFFFFF;
             --text-main: #1D1D1F;
-            --text-secondary: #86868B;
+            --text-secondary: #6B7280;
             --accent: #0071E3;
             --accent-hover: #0077ED;
             --add-color: #059669; 
             --add-bg: #D1FAE5;
             --del-color: #DC2626; 
             --del-bg: #FEE2E2;
-            --border: #E5E7EB;
+            --border: #D1D5DB;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
+            background-color: var(--bg-workspace);
             color: var(--text-main);
             -webkit-font-smoothing: antialiased;
         }
@@ -38,14 +38,15 @@
         .toolbar {
             position: fixed;
             top: 0; left: 0; right: 0;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
             padding: 16px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .controls-group {
@@ -62,7 +63,7 @@
 
         .file-input label {
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -75,11 +76,11 @@
         }
 
         .swap-btn {
-            background: none;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -87,6 +88,7 @@
             color: var(--text-secondary);
             transition: all 0.2s;
             margin-bottom: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .swap-btn:hover {
             background: var(--border);
@@ -98,7 +100,7 @@
             background-color: var(--accent);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 10px 20px;
             font-size: 14px;
             font-weight: 600;
@@ -106,20 +108,22 @@
             transition: background-color 0.2s;
         }
         .btn:hover { background-color: var(--accent-hover); }
-        .btn:disabled { background-color: #A1A1A6; cursor: not-allowed; }
+        .btn:disabled { background-color: #9CA3AF; cursor: not-allowed; }
         
         .btn-outline {
-            background-color: transparent;
-            color: var(--accent);
-            border: 1.5px solid var(--accent);
+            background-color: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
+        .btn-outline:hover { background-color: #F9FAFB; }
 
         #exportBtn { display: none; }
 
         /* --- WORKSPACE --- */
         .workspace {
-            margin-top: 100px;
-            padding: 20px 40px 60px 40px;
+            margin-top: 85px;
+            padding: 40px 20px 80px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -127,20 +131,26 @@
 
         .doc-header {
             width: 100%;
-            max-width: 1000px;
+            max-width: 210mm; /* Allineato alla larghezza del foglio A4 */
             display: none;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            align-items: flex-end;
+            margin-bottom: 16px;
         }
 
-        .file-names { font-size: 14px; color: var(--text-secondary); }
+        .file-names { 
+            font-size: 14px; 
+            color: var(--text-secondary); 
+            background: rgba(255,255,255,0.6);
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
         .file-names strong { color: var(--text-main); }
 
         /* View Toggle */
         .view-toggle {
             display: flex;
-            background: #E5E7EB;
+            background: #D1D5DB;
             border-radius: 8px;
             padding: 4px;
         }
@@ -151,7 +161,7 @@
             border-radius: 6px;
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: #4B5563;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -162,36 +172,40 @@
         }
 
         .summary-bar {
+            max-width: 210mm;
+            width: 100%;
             margin-bottom: 24px;
             font-size: 14px;
             font-weight: 500;
             color: var(--text-secondary);
+            text-align: center;
             display: none;
         }
 
+        /* --- FOGLIO STILE WORD (A4) --- */
         .document-page {
             background: var(--surface);
-            width: 100%;
-            max-width: 1000px;
-            padding: 60px 80px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            border-radius: 12px;
-            font-size: 15px;
-            line-height: 1.6;
-            white-space: pre-wrap; /* Mantiene spazi, indentazioni e a capo originali */
+            width: 210mm; /* Larghezza standard A4 */
+            min-height: 297mm; /* Altezza minima A4 */
+            padding: 25mm; /* Margini standard Word */
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05);
+            
+            /* Tipografia in stile documento */
+            font-family: "Calibri", "Arial", sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000000;
+            
+            white-space: pre-wrap;
             word-wrap: break-word;
-            border: 1px solid var(--border);
             tab-size: 4;
         }
 
-        /* --- MOTORE DIFF INLINE (ANTI-ROTTURA LAYOUT) --- */
-        /* Regola d'oro: Solo span puri. Nessun blocco, nessun padding laterale. */
-        
-        .diff-group {
-            display: inline; 
-        }
+        /* --- MOTORE DIFF INLINE --- */
+        .diff-group { display: inline; }
 
-        /* 1. VISTA REVISIONI (Tutte le modifiche aperte in modo esplicito) */
+        /* VISTA REVISIONI (Tutto Aperto) */
         .view-all .del {
             background-color: var(--del-bg);
             color: var(--del-color);
@@ -201,39 +215,35 @@
             background-color: var(--add-bg);
             color: var(--add-color);
         }
-        .view-all .pure-del-marker {
-            display: none; /* In vista totale non serve il segnaposto */
-        }
+        .view-all .pure-del-marker { display: none; }
 
-        /* 2. VISTA PULITA INTERATTIVA (Nuova Versione) */
-        .view-clean .del {
-            display: none; /* Nascondiamo le cancellature di default */
-        }
+        /* VISTA PULITA INTERATTIVA */
+        .view-clean .del { display: none; }
+        
         .view-clean .add {
-            background-color: rgba(16, 185, 129, 0.08); /* Fondo verde leggerissimo */
-            border-bottom: 2px solid var(--add-color); /* Contorno delicato basso */
+            background-color: rgba(16, 185, 129, 0.08); 
+            border-bottom: 2px solid var(--add-color); 
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .view-clean .add:hover {
-            background-color: rgba(16, 185, 129, 0.2);
-        }
+        .view-clean .add:hover { background-color: rgba(16, 185, 129, 0.2); }
         
-        /* Marker discreto per testo puramente rimosso nella Vista Pulita */
         .view-clean .pure-del-marker {
             display: inline-block;
             width: 6px;
-            height: 14px;
-            background-color: #D1D5DB;
-            border-radius: 2px;
+            height: 12px;
+            background-color: #9CA3AF;
             margin: 0 2px;
             cursor: pointer;
             vertical-align: middle;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, transform 0.2s;
         }
-        .view-clean .pure-del-marker:hover { background-color: #9CA3AF; }
+        .view-clean .pure-del-marker:hover { 
+            background-color: var(--del-color);
+            transform: scaleX(1.5);
+        }
 
-        /* Comportamento al click (Dettaglio Aperto) in Vista Pulita */
+        /* Dettaglio Aperto in Vista Pulita */
         .view-clean .show-detail .del {
             display: inline;
             background-color: var(--del-bg);
@@ -246,9 +256,7 @@
             color: var(--add-color);
             border-bottom: 2px solid var(--add-color);
         }
-        .view-clean .show-detail .pure-del-marker {
-            display: none; /* Scompare per fare spazio al testo rosso rivelato */
-        }
+        .view-clean .show-detail .pure-del-marker { display: none; }
 
     </style>
 </head>
@@ -277,7 +285,7 @@
     <div class="workspace">
         <div class="doc-header" id="docHeader">
             <div class="file-names">
-                ORIGINALE: <strong id="nomeOriginale">-</strong> &nbsp;&nbsp;&rarr;&nbsp;&nbsp; NUOVO: <strong id="nomeModificato">-</strong>
+                VECCHIO: <strong id="nomeOriginale">-</strong> &nbsp;&rarr;&nbsp; NUOVO: <strong id="nomeModificato">-</strong>
             </div>
             <div class="view-toggle">
                 <button id="btnViewInteractive" class="active" onclick="setViewMode('clean')">Vista Pulita</button>
@@ -317,8 +325,6 @@
                 docView.classList.add('view-clean');
                 btnClean.classList.add('active');
                 btnAll.classList.remove('active');
-                
-                // Richiude i dettagli aperti se l'utente aveva cliccato in giro
                 document.querySelectorAll('.diff-group.show-detail').forEach(el => el.classList.remove('show-detail'));
             } else {
                 docView.classList.remove('view-clean');
@@ -372,59 +378,69 @@
                 const testoOriginale = await extractTextFromFile(fileOriginale);
                 const testoModificato = await extractTextFromFile(fileModificato);
 
-                // Calcolo globale delle differenze preservando gli spazi
                 differenzeGlobali = Diff.diffWordsWithSpace(testoOriginale, testoModificato);
 
+                let gruppiInterattivi = [];
+                let currentGroup = null;
+
+                // LOGICA DI SMART MERGE: Unisce gli spazi intermedi tra due blocchi di modifica
+                for (let i = 0; i < differenzeGlobali.length; i++) {
+                    let parte = differenzeGlobali[i];
+                    
+                    let isOnlyWhitespace = !parte.added && !parte.removed && parte.value.trim() === '';
+                    let nextParte = differenzeGlobali[i+1];
+                    let isBetweenModifications = isOnlyWhitespace && currentGroup && nextParte && (nextParte.added || nextParte.removed);
+
+                    if (parte.added || parte.removed) {
+                        if (!currentGroup) currentGroup = { del: "", add: "" };
+                        if (parte.added) currentGroup.add += parte.value;
+                        if (parte.removed) currentGroup.del += parte.value;
+                    } else if (isBetweenModifications) {
+                        // Assorbiamo lo spazio/a capo dentro il gruppo corrente
+                        currentGroup.add += parte.value;
+                        currentGroup.del += parte.value;
+                    } else {
+                        if (currentGroup) {
+                            gruppiInterattivi.push({ type: 'mod', ...currentGroup });
+                            currentGroup = null;
+                        }
+                        gruppiInterattivi.push({ type: 'eq', value: parte.value });
+                    }
+                }
+                if (currentGroup) gruppiInterattivi.push({ type: 'mod', ...currentGroup });
+
+                // GENERAZIONE HTML
                 let htmlOutput = "";
                 let paroleAggiunte = 0;
                 let paroleRimosse = 0;
-                
-                let currentGroup = null;
 
-                // Funzione per generare lo span interattivo senza rompere il layout
-                function closeGroup() {
-                    if (currentGroup) {
-                        let delHtml = escapeHtml(currentGroup.del);
-                        let addHtml = escapeHtml(currentGroup.add);
+                gruppiInterattivi.forEach(blocco => {
+                    if (blocco.type === 'eq') {
+                        htmlOutput += escapeHtml(blocco.value);
+                    } else {
+                        let delHtml = escapeHtml(blocco.del);
+                        let addHtml = escapeHtml(blocco.add);
                         
+                        if(blocco.add) paroleAggiunte += blocco.add.trim().split(/\s+/).filter(w=>w).length;
+                        if(blocco.del) paroleRimosse += blocco.del.trim().split(/\s+/).filter(w=>w).length;
+
                         let tooltip = "Modifica: clicca per espandere i dettagli";
-                        if(currentGroup.del && !currentGroup.add) tooltip = "Testo rimosso: clicca per vederlo";
+                        if(blocco.del && !blocco.add) tooltip = "Testo rimosso: clicca per vederlo";
                         
                         htmlOutput += `<span class="diff-group" onclick="this.classList.toggle('show-detail')" title="${tooltip}">`;
-                        
-                        if (currentGroup.del) htmlOutput += `<span class="del">${delHtml}</span>`;
-                        if (currentGroup.add) htmlOutput += `<span class="add">${addHtml}</span>`;
-                        if (currentGroup.del && !currentGroup.add) htmlOutput += `<span class="pure-del-marker"></span>`;
-                        
+                        if (blocco.del) htmlOutput += `<span class="del">${delHtml}</span>`;
+                        if (blocco.add) htmlOutput += `<span class="add">${addHtml}</span>`;
+                        if (blocco.del && !blocco.add) htmlOutput += `<span class="pure-del-marker" title="Testo eliminato qui"></span>`;
                         htmlOutput += `</span>`;
-                        currentGroup = null;
-                    }
-                }
-
-                differenzeGlobali.forEach(parte => {
-                    if (parte.added || parte.removed) {
-                        if (!currentGroup) currentGroup = { del: "", add: "" };
-                        if (parte.added) {
-                            currentGroup.add += parte.value;
-                            paroleAggiunte += parte.value.trim().split(/\s+/).filter(w=>w).length;
-                        }
-                        if (parte.removed) {
-                            currentGroup.del += parte.value;
-                            paroleRimosse += parte.value.trim().split(/\s+/).filter(w=>w).length;
-                        }
-                    } else {
-                        // Non appena c'è del testo inalterato, chiudiamo il gruppo corrente
-                        closeGroup();
-                        htmlOutput += escapeHtml(parte.value);
                     }
                 });
-                closeGroup(); // Chiude eventuale gruppo rimasto in coda
 
                 document.getElementById('documentView').innerHTML = htmlOutput;
                 document.getElementById('summaryBar').innerHTML = `<span style="color: var(--add-color)">+${paroleAggiunte} parole aggiunte</span> &nbsp;|&nbsp; <span style="color: var(--del-color)">-${paroleRimosse} parole rimosse</span>`;
                 
                 document.getElementById('docHeader').style.display = "flex";
-                document.getElementById('diffContainer').style.display = "block";
+                document.getElementById('diffContainer').style.display = "flex";
+                document.getElementById('diffContainer').style.justifyContent = "center";
                 document.getElementById('summaryBar').style.display = "block";
                 document.getElementById('exportBtn').style.display = "block";
 
@@ -456,14 +472,15 @@
                         if (segmento.length > 0) {
                             currentRuns.push(new TextRun({
                                 text: segmento,
-                                color: parte.added ? "059669" : (parte.removed ? "DC2626" : "1D1D1F"),
+                                color: parte.added ? "059669" : (parte.removed ? "DC2626" : "000000"),
                                 strike: parte.removed || false,
                                 bold: parte.added || false,
-                                size: 24 
+                                font: "Calibri",
+                                size: 22 // 11pt in docx
                             }));
                         }
                         if (index < segmentiTesto.length - 1) {
-                            paragrafiWord.push(new Paragraph({ children: currentRuns, spacing: { after: 200 } }));
+                            paragrafiWord.push(new Paragraph({ children: currentRuns, spacing: { after: 120 } }));
                             currentRuns = [];
                         }
                     });

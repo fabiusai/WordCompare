@@ -12,7 +12,7 @@
 
     <style>
         :root {
-            --bg-workspace: #E5E7EB; /* Sfondo scuro per far risaltare il foglio */
+            --bg-workspace: #E5E7EB;
             --surface: #FFFFFF;
             --text-main: #1D1D1F;
             --text-secondary: #6B7280;
@@ -51,28 +51,66 @@
 
         .controls-group {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             align-items: flex-end;
         }
 
-        .file-input {
+        .input-block {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
-        .file-input label {
-            font-size: 12px;
+        .input-block label {
+            font-size: 11px;
             font-weight: 700;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        input[type="file"] {
+        /* Stili per Input File e Select */
+        select, input[type="file"] {
             font-size: 13px;
             color: var(--text-main);
-            width: 220px;
+            width: 200px;
+            font-family: inherit;
+        }
+        
+        select {
+            padding: 6px 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--surface);
+            cursor: pointer;
+            width: 160px;
+        }
+
+        /* Stili per Textarea (Incolla Testo) */
+        textarea.paste-area {
+            font-size: 12px;
+            font-family: inherit;
+            color: var(--text-main);
+            width: 200px;
+            height: 34px;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            resize: none;
+            background-color: var(--surface);
+            line-height: 1.2;
+            transition: border-color 0.2s;
+        }
+        textarea.paste-area:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .mode-divider {
+            width: 1px;
+            height: 34px;
+            background-color: var(--border);
+            margin: 0 4px;
         }
 
         .swap-btn {
@@ -106,6 +144,9 @@
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s;
+            height: 36px;
+            display: flex;
+            align-items: center;
         }
         .btn:hover { background-color: var(--accent-hover); }
         .btn:disabled { background-color: #9CA3AF; cursor: not-allowed; }
@@ -131,7 +172,7 @@
 
         .doc-header {
             width: 100%;
-            max-width: 210mm; /* Allineato alla larghezza del foglio A4 */
+            max-width: 210mm;
             display: none;
             justify-content: space-between;
             align-items: flex-end;
@@ -147,7 +188,6 @@
         }
         .file-names strong { color: var(--text-main); }
 
-        /* View Toggle */
         .view-toggle {
             display: flex;
             background: #D1D5DB;
@@ -185,18 +225,15 @@
         /* --- FOGLIO STILE WORD (A4) --- */
         .document-page {
             background: var(--surface);
-            width: 210mm; /* Larghezza standard A4 */
-            min-height: 297mm; /* Altezza minima A4 */
-            padding: 25mm; /* Margini standard Word */
+            width: 210mm;
+            min-height: 297mm;
+            padding: 25mm;
             margin: 0 auto;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05);
-            
-            /* Tipografia in stile documento */
             font-family: "Calibri", "Arial", sans-serif;
             font-size: 11pt;
             line-height: 1.4;
             color: #000000;
-            
             white-space: pre-wrap;
             word-wrap: break-word;
             tab-size: 4;
@@ -215,7 +252,6 @@
             background-color: var(--add-bg);
             color: var(--add-color);
         }
-        .view-all .pure-del-marker { display: none; }
 
         /* VISTA PULITA INTERATTIVA */
         .view-clean .del { display: none; }
@@ -227,21 +263,6 @@
             transition: background-color 0.2s;
         }
         .view-clean .add:hover { background-color: rgba(16, 185, 129, 0.2); }
-        
-        .view-clean .pure-del-marker {
-            display: inline-block;
-            width: 6px;
-            height: 12px;
-            background-color: #9CA3AF;
-            margin: 0 2px;
-            cursor: pointer;
-            vertical-align: middle;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-        .view-clean .pure-del-marker:hover { 
-            background-color: var(--del-color);
-            transform: scaleX(1.5);
-        }
 
         /* Dettaglio Aperto in Vista Pulita */
         .view-clean .show-detail .del {
@@ -256,7 +277,6 @@
             color: var(--add-color);
             border-bottom: 2px solid var(--add-color);
         }
-        .view-clean .show-detail .pure-del-marker { display: none; }
 
     </style>
 </head>
@@ -264,19 +284,46 @@
 
     <div class="toolbar">
         <div class="controls-group">
-            <div class="file-input">
-                <label for="fileOriginale">Originale</label>
-                <input type="file" id="fileOriginale" accept=".docx,.txt">
+            
+            <div class="input-block">
+                <label for="inputMode">Modalità</label>
+                <select id="inputMode" onchange="toggleInputMode()">
+                    <option value="file">File (.docx, .txt)</option>
+                    <option value="text">Incolla Testo</option>
+                </select>
             </div>
             
-            <button class="swap-btn" onclick="scambiaFile()" title="Scambia i due file">⇄</button>
+            <div class="mode-divider"></div>
 
-            <div class="file-input">
-                <label for="fileModificato">Modificato</label>
-                <input type="file" id="fileModificato" accept=".docx,.txt">
+            <div class="controls-group" id="fileInputs">
+                <div class="input-block">
+                    <label for="fileOriginale">Originale</label>
+                    <input type="file" id="fileOriginale" accept=".docx,.txt">
+                </div>
+                <button class="swap-btn" onclick="scambiaInput('file')" title="Scambia i due file">⇄</button>
+                <div class="input-block">
+                    <label for="fileModificato">Modificato</label>
+                    <input type="file" id="fileModificato" accept=".docx,.txt">
+                </div>
             </div>
-            <button id="btnGenera" class="btn" onclick="processFiles()">Analizza Testi</button>
+
+            <div class="controls-group" id="textInputs" style="display: none;">
+                <div class="input-block">
+                    <label for="textOriginale">Originale</label>
+                    <textarea id="textOriginale" class="paste-area" placeholder="Incolla qui il vecchio testo..."></textarea>
+                </div>
+                <button class="swap-btn" onclick="scambiaInput('text')" title="Scambia i due testi">⇄</button>
+                <div class="input-block">
+                    <label for="textModificato">Modificato</label>
+                    <textarea id="textModificato" class="paste-area" placeholder="Incolla qui il nuovo testo..."></textarea>
+                </div>
+            </div>
+
+            <div class="mode-divider"></div>
+
+            <button id="btnGenera" class="btn" onclick="processFiles()">Analizza</button>
         </div>
+        
         <div class="controls-group">
             <button id="exportBtn" class="btn btn-outline" onclick="esportaWord()">Esporta in Word</button>
         </div>
@@ -302,17 +349,38 @@
     <script>
         let differenzeGlobali = null;
 
-        function scambiaFile() {
-            const inputOrig = document.getElementById('fileOriginale');
-            const inputMod = document.getElementById('fileModificato');
-            const dt1 = new DataTransfer();
-            const dt2 = new DataTransfer();
-            
-            if(inputMod.files.length > 0) dt1.items.add(inputMod.files[0]);
-            if(inputOrig.files.length > 0) dt2.items.add(inputOrig.files[0]);
-            
-            inputOrig.files = dt1.files;
-            inputMod.files = dt2.files;
+        // Gestisce il cambio vista tra File e Testo
+        function toggleInputMode() {
+            const mode = document.getElementById('inputMode').value;
+            if (mode === 'text') {
+                document.getElementById('fileInputs').style.display = 'none';
+                document.getElementById('textInputs').style.display = 'flex';
+            } else {
+                document.getElementById('fileInputs').style.display = 'flex';
+                document.getElementById('textInputs').style.display = 'none';
+            }
+        }
+
+        // Gestisce lo scambio in base alla modalità attiva
+        function scambiaInput(mode) {
+            if (mode === 'file') {
+                const inputOrig = document.getElementById('fileOriginale');
+                const inputMod = document.getElementById('fileModificato');
+                const dt1 = new DataTransfer();
+                const dt2 = new DataTransfer();
+                
+                if(inputMod.files.length > 0) dt1.items.add(inputMod.files[0]);
+                if(inputOrig.files.length > 0) dt2.items.add(inputOrig.files[0]);
+                
+                inputOrig.files = dt1.files;
+                inputMod.files = dt2.files;
+            } else {
+                const textOrig = document.getElementById('textOriginale');
+                const textMod = document.getElementById('textModificato');
+                const temp = textOrig.value;
+                textOrig.value = textMod.value;
+                textMod.value = temp;
+            }
         }
 
         function setViewMode(mode) {
@@ -359,31 +427,52 @@
         }
 
         async function processFiles() {
-            const fileOriginale = document.getElementById('fileOriginale').files[0];
-            const fileModificato = document.getElementById('fileModificato').files[0];
             const btnGenera = document.getElementById('btnGenera');
-
-            if (!fileOriginale || !fileModificato) {
-                alert("Per favore, carica entrambi i documenti.");
-                return;
-            }
+            const mode = document.getElementById('inputMode').value;
+            
+            let testoOriginale = "";
+            let testoModificato = "";
+            let nomeOrig = "";
+            let nomeMod = "";
 
             try {
                 btnGenera.disabled = true;
-                btnGenera.innerText = "Analisi in corso...";
+                btnGenera.innerText = "Analisi...";
 
-                document.getElementById('nomeOriginale').innerText = fileOriginale.name;
-                document.getElementById('nomeModificato').innerText = fileModificato.name;
+                // Estrazione dati in base alla modalità
+                if (mode === 'file') {
+                    const fileOriginale = document.getElementById('fileOriginale').files[0];
+                    const fileModificato = document.getElementById('fileModificato').files[0];
+                    
+                    if (!fileOriginale || !fileModificato) {
+                        alert("Per favore, carica entrambi i documenti.");
+                        return;
+                    }
+                    nomeOrig = fileOriginale.name;
+                    nomeMod = fileModificato.name;
+                    testoOriginale = await extractTextFromFile(fileOriginale);
+                    testoModificato = await extractTextFromFile(fileModificato);
+                } else {
+                    testoOriginale = document.getElementById('textOriginale').value;
+                    testoModificato = document.getElementById('textModificato').value;
+                    
+                    if (!testoOriginale.trim() || !testoModificato.trim()) {
+                        alert("Per favore, incolla il testo in entrambi i campi.");
+                        return;
+                    }
+                    nomeOrig = "Testo Appunti 1";
+                    nomeMod = "Testo Appunti 2";
+                }
 
-                const testoOriginale = await extractTextFromFile(fileOriginale);
-                const testoModificato = await extractTextFromFile(fileModificato);
+                document.getElementById('nomeOriginale').innerText = nomeOrig;
+                document.getElementById('nomeModificato').innerText = nomeMod;
 
                 differenzeGlobali = Diff.diffWordsWithSpace(testoOriginale, testoModificato);
 
                 let gruppiInterattivi = [];
                 let currentGroup = null;
 
-                // LOGICA DI SMART MERGE: Unisce gli spazi intermedi tra due blocchi di modifica
+                // LOGICA DI SMART MERGE
                 for (let i = 0; i < differenzeGlobali.length; i++) {
                     let parte = differenzeGlobali[i];
                     
@@ -396,7 +485,6 @@
                         if (parte.added) currentGroup.add += parte.value;
                         if (parte.removed) currentGroup.del += parte.value;
                     } else if (isBetweenModifications) {
-                        // Assorbiamo lo spazio/a capo dentro il gruppo corrente
                         currentGroup.add += parte.value;
                         currentGroup.del += parte.value;
                     } else {
@@ -424,13 +512,11 @@
                         if(blocco.add) paroleAggiunte += blocco.add.trim().split(/\s+/).filter(w=>w).length;
                         if(blocco.del) paroleRimosse += blocco.del.trim().split(/\s+/).filter(w=>w).length;
 
-                        let tooltip = "Modifica: clicca per espandere i dettagli";
-                        
+                        // Se è stata solo rimossa una parte, applichiamo la logica di invisibilità in "Vista Pulita"
                         if (blocco.del && !blocco.add) {
-                            // È una pura eliminazione: nella Vista Pulita è invisibile, in Mostra Tutto appare barrato
                             htmlOutput += `<span class="diff-group"><span class="del">${delHtml}</span></span>`;
                         } else {
-                            // C'è del nuovo testo: creiamo il tasto interattivo verde
+                            let tooltip = "Modifica: clicca per espandere i dettagli";
                             htmlOutput += `<span class="diff-group" onclick="this.classList.toggle('show-detail')" title="${tooltip}">`;
                             if (blocco.del) htmlOutput += `<span class="del">${delHtml}</span>`;
                             if (blocco.add) htmlOutput += `<span class="add">${addHtml}</span>`;
@@ -453,7 +539,7 @@
                 alert("Si è verificato un errore durante l'elaborazione.");
             } finally {
                 btnGenera.disabled = false;
-                btnGenera.innerText = "Analizza Testi";
+                btnGenera.innerText = "Analizza";
             }
         }
 
@@ -480,7 +566,7 @@
                                 strike: parte.removed || false,
                                 bold: parte.added || false,
                                 font: "Calibri",
-                                size: 22 // 11pt in docx
+                                size: 22 
                             }));
                         }
                         if (index < segmentiTesto.length - 1) {

@@ -425,13 +425,17 @@
                         if(blocco.del) paroleRimosse += blocco.del.trim().split(/\s+/).filter(w=>w).length;
 
                         let tooltip = "Modifica: clicca per espandere i dettagli";
-                        if(blocco.del && !blocco.add) tooltip = "Testo rimosso: clicca per vederlo";
                         
-                        htmlOutput += `<span class="diff-group" onclick="this.classList.toggle('show-detail')" title="${tooltip}">`;
-                        if (blocco.del) htmlOutput += `<span class="del">${delHtml}</span>`;
-                        if (blocco.add) htmlOutput += `<span class="add">${addHtml}</span>`;
-                        if (blocco.del && !blocco.add) htmlOutput += `<span class="pure-del-marker" title="Testo eliminato qui"></span>`;
-                        htmlOutput += `</span>`;
+                        if (blocco.del && !blocco.add) {
+                            // È una pura eliminazione: nella Vista Pulita è invisibile, in Mostra Tutto appare barrato
+                            htmlOutput += `<span class="diff-group"><span class="del">${delHtml}</span></span>`;
+                        } else {
+                            // C'è del nuovo testo: creiamo il tasto interattivo verde
+                            htmlOutput += `<span class="diff-group" onclick="this.classList.toggle('show-detail')" title="${tooltip}">`;
+                            if (blocco.del) htmlOutput += `<span class="del">${delHtml}</span>`;
+                            if (blocco.add) htmlOutput += `<span class="add">${addHtml}</span>`;
+                            htmlOutput += `</span>`;
+                        }
                     }
                 });
 

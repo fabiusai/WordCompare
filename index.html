@@ -43,10 +43,10 @@
             border-bottom: 1px solid rgba(0,0,0,0.1);
             padding: 16px 40px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            z-index: 100;
+            z-index: 50;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            gap: 24px;
         }
 
         .controls-group {
@@ -69,48 +69,18 @@
             letter-spacing: 0.5px;
         }
 
-        /* Stili per Input File e Select */
-        select, input[type="file"] {
+        input[type="file"] {
             font-size: 13px;
             color: var(--text-main);
             width: 200px;
             font-family: inherit;
-        }
-        
-        select {
-            padding: 6px 8px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background-color: var(--surface);
-            cursor: pointer;
-            width: 160px;
-        }
-
-        /* Stili per Textarea (Incolla Testo) */
-        textarea.paste-area {
-            font-size: 12px;
-            font-family: inherit;
-            color: var(--text-main);
-            width: 200px;
-            height: 34px;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            resize: none;
-            background-color: var(--surface);
-            line-height: 1.2;
-            transition: border-color 0.2s;
-        }
-        textarea.paste-area:focus {
-            outline: none;
-            border-color: var(--accent);
         }
 
         .mode-divider {
             width: 1px;
             height: 34px;
             background-color: var(--border);
-            margin: 0 4px;
+            margin: 0 8px;
         }
 
         .swap-btn {
@@ -127,6 +97,7 @@
             transition: all 0.2s;
             margin-bottom: 2px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            flex-shrink: 0;
         }
         .swap-btn:hover {
             background: var(--border);
@@ -139,7 +110,7 @@
             color: white;
             border: none;
             border-radius: 6px;
-            padding: 10px 20px;
+            padding: 0 20px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -147,6 +118,7 @@
             height: 36px;
             display: flex;
             align-items: center;
+            justify-content: center;
         }
         .btn:hover { background-color: var(--accent-hover); }
         .btn:disabled { background-color: #9CA3AF; cursor: not-allowed; }
@@ -159,173 +131,160 @@
         }
         .btn-outline:hover { background-color: #F9FAFB; }
 
-        #exportBtn { display: none; }
+        /* Spacer per spingere l'export a destra */
+        .flex-spacer { flex: 1; }
+
+        /* --- MODALE TESTO --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; transition: opacity 0.2s ease;
+        }
+        .modal-overlay.open { display: flex; opacity: 1; }
+
+        .modal-card {
+            background: var(--surface); width: 90vw; max-width: 1400px; height: 80vh;
+            border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; overflow: hidden;
+            transform: translateY(20px); transition: transform 0.2s ease;
+        }
+        .modal-overlay.open .modal-card { transform: translateY(0); }
+
+        .modal-header { 
+            padding: 20px 24px; border-bottom: 1px solid var(--border); 
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+        .modal-header h3 { font-size: 18px; margin: 0; color: var(--text-main); }
+        .close-btn { 
+            background: none; border: none; font-size: 28px; line-height: 1; 
+            cursor: pointer; color: var(--text-secondary); transition: color 0.2s; 
+        }
+        .close-btn:hover { color: var(--text-main); }
+
+        .modal-body { 
+            flex: 1; display: flex; gap: 24px; padding: 24px; 
+            background: var(--bg-workspace); align-items: center; min-height: 0;
+        }
+        
+        .text-pane { flex: 1; display: flex; flex-direction: column; height: 100%; gap: 10px; }
+        .text-pane label { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+        .text-pane textarea { 
+            flex: 1; resize: none; border: 1px solid var(--border); border-radius: 8px; 
+            padding: 16px; font-family: "SF Mono", Consolas, monospace; font-size: 14px; 
+            line-height: 1.5; outline: none; transition: border-color 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .text-pane textarea:focus { border-color: var(--accent); }
+
+        .modal-footer { 
+            padding: 16px 24px; border-top: 1px solid var(--border); 
+            display: flex; justify-content: flex-end; gap: 12px; background: var(--surface);
+        }
+
 
         /* --- WORKSPACE --- */
         .workspace {
-            margin-top: 85px;
-            padding: 40px 20px 80px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin-top: 85px; padding: 40px 20px 80px 20px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         .doc-header {
-            width: 100%;
-            max-width: 210mm;
-            display: none;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 16px;
+            width: 100%; max-width: 210mm; display: none;
+            justify-content: space-between; align-items: flex-end; margin-bottom: 16px;
         }
 
         .file-names { 
-            font-size: 14px; 
-            color: var(--text-secondary); 
-            background: rgba(255,255,255,0.6);
-            padding: 8px 12px;
-            border-radius: 6px;
+            font-size: 14px; color: var(--text-secondary); 
+            background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 6px;
         }
         .file-names strong { color: var(--text-main); }
 
         .view-toggle {
-            display: flex;
-            background: #D1D5DB;
-            border-radius: 8px;
-            padding: 4px;
+            display: flex; background: #D1D5DB; border-radius: 8px; padding: 4px;
         }
         .view-toggle button {
-            background: transparent;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #4B5563;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: transparent; border: none; padding: 6px 16px; border-radius: 6px;
+            font-size: 13px; font-weight: 600; color: #4B5563; cursor: pointer; transition: all 0.2s;
         }
-        .view-toggle button.active {
-            background: var(--surface);
-            color: var(--text-main);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+        .view-toggle button.active { background: var(--surface); color: var(--text-main); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
         .summary-bar {
-            max-width: 210mm;
-            width: 100%;
-            margin-bottom: 24px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            text-align: center;
-            display: none;
+            max-width: 210mm; width: 100%; margin-bottom: 24px; font-size: 14px;
+            font-weight: 500; color: var(--text-secondary); text-align: center; display: none;
         }
 
         /* --- FOGLIO STILE WORD (A4) --- */
         .document-page {
-            background: var(--surface);
-            width: 210mm;
-            min-height: 297mm;
-            padding: 25mm;
-            margin: 0 auto;
+            background: var(--surface); width: 210mm; min-height: 297mm; padding: 25mm; margin: 0 auto;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05);
-            font-family: "Calibri", "Arial", sans-serif;
-            font-size: 11pt;
-            line-height: 1.4;
-            color: #000000;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            tab-size: 4;
+            font-family: "Calibri", "Arial", sans-serif; font-size: 11pt; line-height: 1.4; color: #000000;
+            white-space: pre-wrap; word-wrap: break-word; tab-size: 4;
         }
 
         /* --- MOTORE DIFF INLINE --- */
         .diff-group { display: inline; }
-
-        /* VISTA REVISIONI (Tutto Aperto) */
-        .view-all .del {
-            background-color: var(--del-bg);
-            color: var(--del-color);
-            text-decoration: line-through;
-        }
-        .view-all .add {
-            background-color: var(--add-bg);
-            color: var(--add-color);
-        }
-
-        /* VISTA PULITA INTERATTIVA */
+        .view-all .del { background-color: var(--del-bg); color: var(--del-color); text-decoration: line-through; }
+        .view-all .add { background-color: var(--add-bg); color: var(--add-color); }
         .view-clean .del { display: none; }
-        
-        .view-clean .add {
-            background-color: rgba(16, 185, 129, 0.08); 
-            border-bottom: 2px solid var(--add-color); 
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+        .view-clean .add { background-color: rgba(16, 185, 129, 0.08); border-bottom: 2px solid var(--add-color); cursor: pointer; transition: background-color 0.2s; }
         .view-clean .add:hover { background-color: rgba(16, 185, 129, 0.2); }
-
-        /* Dettaglio Aperto in Vista Pulita */
-        .view-clean .show-detail .del {
-            display: inline;
-            background-color: var(--del-bg);
-            color: var(--del-color);
-            text-decoration: line-through;
-            border-bottom: 2px dashed var(--del-color);
-        }
-        .view-clean .show-detail .add {
-            background-color: var(--add-bg);
-            color: var(--add-color);
-            border-bottom: 2px solid var(--add-color);
-        }
-
+        .view-clean .show-detail .del { display: inline; background-color: var(--del-bg); color: var(--del-color); text-decoration: line-through; border-bottom: 2px dashed var(--del-color); }
+        .view-clean .show-detail .add { background-color: var(--add-bg); color: var(--add-color); border-bottom: 2px solid var(--add-color); }
     </style>
 </head>
 <body>
 
+    <div id="textModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Incolla Testi da Confrontare</h3>
+                <button class="close-btn" onclick="chiudiModale()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="text-pane">
+                    <label>Versione Originale</label>
+                    <textarea id="textOriginale" placeholder="Incolla qui la vecchia versione del codice o del testo..."></textarea>
+                </div>
+                
+                <button class="swap-btn" onclick="scambiaTesti()" title="Scambia i due testi">⇄</button>
+                
+                <div class="text-pane">
+                    <label>Nuova Versione</label>
+                    <textarea id="textModificato" placeholder="Incolla qui la nuova versione del codice o del testo..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="chiudiModale()">Annulla</button>
+                <button class="btn" onclick="analizzaDaTesto()">Analizza Testi</button>
+            </div>
+        </div>
+    </div>
+
+
     <div class="toolbar">
         <div class="controls-group">
-            
             <div class="input-block">
-                <label for="inputMode">Modalità</label>
-                <select id="inputMode" onchange="toggleInputMode()">
-                    <option value="file">File (.docx, .txt)</option>
-                    <option value="text">Incolla Testo</option>
-                </select>
+                <label for="fileOriginale">File Originale</label>
+                <input type="file" id="fileOriginale" accept=".docx,.txt">
             </div>
-            
-            <div class="mode-divider"></div>
-
-            <div class="controls-group" id="fileInputs">
-                <div class="input-block">
-                    <label for="fileOriginale">Originale</label>
-                    <input type="file" id="fileOriginale" accept=".docx,.txt">
-                </div>
-                <button class="swap-btn" onclick="scambiaInput('file')" title="Scambia i due file">⇄</button>
-                <div class="input-block">
-                    <label for="fileModificato">Modificato</label>
-                    <input type="file" id="fileModificato" accept=".docx,.txt">
-                </div>
+            <button class="swap-btn" onclick="scambiaFile()" title="Scambia i due file">⇄</button>
+            <div class="input-block">
+                <label for="fileModificato">File Modificato</label>
+                <input type="file" id="fileModificato" accept=".docx,.txt">
             </div>
-
-            <div class="controls-group" id="textInputs" style="display: none;">
-                <div class="input-block">
-                    <label for="textOriginale">Originale</label>
-                    <textarea id="textOriginale" class="paste-area" placeholder="Incolla qui il vecchio testo..."></textarea>
-                </div>
-                <button class="swap-btn" onclick="scambiaInput('text')" title="Scambia i due testi">⇄</button>
-                <div class="input-block">
-                    <label for="textModificato">Modificato</label>
-                    <textarea id="textModificato" class="paste-area" placeholder="Incolla qui il nuovo testo..."></textarea>
-                </div>
-            </div>
-
-            <div class="mode-divider"></div>
-
-            <button id="btnGenera" class="btn" onclick="processFiles()">Analizza</button>
+            <button id="btnGenera" class="btn" onclick="analizzaDaFile()">Analizza File</button>
         </div>
         
+        <div class="mode-divider"></div>
+
         <div class="controls-group">
-            <button id="exportBtn" class="btn btn-outline" onclick="esportaWord()">Esporta in Word</button>
+            <button class="btn btn-outline" onclick="apriModale()">📝 Incolla Testo Libero</button>
+        </div>
+        
+        <div class="flex-spacer"></div>
+
+        <div class="controls-group">
+            <button id="exportBtn" class="btn btn-outline" style="display: none;" onclick="esportaWord()">Esporta in Word</button>
         </div>
     </div>
 
@@ -349,40 +308,40 @@
     <script>
         let differenzeGlobali = null;
 
-        // Gestisce il cambio vista tra File e Testo
-        function toggleInputMode() {
-            const mode = document.getElementById('inputMode').value;
-            if (mode === 'text') {
-                document.getElementById('fileInputs').style.display = 'none';
-                document.getElementById('textInputs').style.display = 'flex';
-            } else {
-                document.getElementById('fileInputs').style.display = 'flex';
-                document.getElementById('textInputs').style.display = 'none';
-            }
+        // --- GESTIONE MODALE ---
+        function apriModale() {
+            document.getElementById('textModal').classList.add('open');
+            document.body.style.overflow = 'hidden'; // Blocca lo scroll della pagina sotto
         }
 
-        // Gestisce lo scambio in base alla modalità attiva
-        function scambiaInput(mode) {
-            if (mode === 'file') {
-                const inputOrig = document.getElementById('fileOriginale');
-                const inputMod = document.getElementById('fileModificato');
-                const dt1 = new DataTransfer();
-                const dt2 = new DataTransfer();
-                
-                if(inputMod.files.length > 0) dt1.items.add(inputMod.files[0]);
-                if(inputOrig.files.length > 0) dt2.items.add(inputOrig.files[0]);
-                
-                inputOrig.files = dt1.files;
-                inputMod.files = dt2.files;
-            } else {
-                const textOrig = document.getElementById('textOriginale');
-                const textMod = document.getElementById('textModificato');
-                const temp = textOrig.value;
-                textOrig.value = textMod.value;
-                textMod.value = temp;
-            }
+        function chiudiModale() {
+            document.getElementById('textModal').classList.remove('open');
+            document.body.style.overflow = 'auto';
         }
 
+        function scambiaTesti() {
+            const txtOrig = document.getElementById('textOriginale');
+            const txtMod = document.getElementById('textModificato');
+            const temp = txtOrig.value;
+            txtOrig.value = txtMod.value;
+            txtMod.value = temp;
+        }
+
+        // --- GESTIONE FILE BARRA STRUMENTI ---
+        function scambiaFile() {
+            const inputOrig = document.getElementById('fileOriginale');
+            const inputMod = document.getElementById('fileModificato');
+            const dt1 = new DataTransfer();
+            const dt2 = new DataTransfer();
+            
+            if(inputMod.files.length > 0) dt1.items.add(inputMod.files[0]);
+            if(inputOrig.files.length > 0) dt2.items.add(inputOrig.files[0]);
+            
+            inputOrig.files = dt1.files;
+            inputMod.files = dt2.files;
+        }
+
+        // --- GESTIONE VISTE DOCUMENTO ---
         function setViewMode(mode) {
             const docView = document.getElementById('documentView');
             const btnClean = document.getElementById('btnViewInteractive');
@@ -402,6 +361,7 @@
             }
         }
 
+        // --- ESTRAZIONE DATI ---
         function extractTextFromFile(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -426,123 +386,125 @@
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        async function processFiles() {
+        // --- FUNZIONI DI TRIGGER (Avviano il motore da sorgenti diverse) ---
+        
+        async function analizzaDaFile() {
+            const fileOrig = document.getElementById('fileOriginale').files[0];
+            const fileMod = document.getElementById('fileModificato').files[0];
             const btnGenera = document.getElementById('btnGenera');
-            const mode = document.getElementById('inputMode').value;
-            
-            let testoOriginale = "";
-            let testoModificato = "";
-            let nomeOrig = "";
-            let nomeMod = "";
+
+            if (!fileOrig || !fileMod) {
+                alert("Per favore, carica entrambi i documenti.");
+                return;
+            }
 
             try {
                 btnGenera.disabled = true;
                 btnGenera.innerText = "Analisi...";
 
-                // Estrazione dati in base alla modalità
-                if (mode === 'file') {
-                    const fileOriginale = document.getElementById('fileOriginale').files[0];
-                    const fileModificato = document.getElementById('fileModificato').files[0];
-                    
-                    if (!fileOriginale || !fileModificato) {
-                        alert("Per favore, carica entrambi i documenti.");
-                        return;
-                    }
-                    nomeOrig = fileOriginale.name;
-                    nomeMod = fileModificato.name;
-                    testoOriginale = await extractTextFromFile(fileOriginale);
-                    testoModificato = await extractTextFromFile(fileModificato);
-                } else {
-                    testoOriginale = document.getElementById('textOriginale').value;
-                    testoModificato = document.getElementById('textModificato').value;
-                    
-                    if (!testoOriginale.trim() || !testoModificato.trim()) {
-                        alert("Per favore, incolla il testo in entrambi i campi.");
-                        return;
-                    }
-                    nomeOrig = "Testo Appunti 1";
-                    nomeMod = "Testo Appunti 2";
-                }
-
-                document.getElementById('nomeOriginale').innerText = nomeOrig;
-                document.getElementById('nomeModificato').innerText = nomeMod;
-
-                differenzeGlobali = Diff.diffWordsWithSpace(testoOriginale, testoModificato);
-
-                let gruppiInterattivi = [];
-                let currentGroup = null;
-
-                // LOGICA DI SMART MERGE
-                for (let i = 0; i < differenzeGlobali.length; i++) {
-                    let parte = differenzeGlobali[i];
-                    
-                    let isOnlyWhitespace = !parte.added && !parte.removed && parte.value.trim() === '';
-                    let nextParte = differenzeGlobali[i+1];
-                    let isBetweenModifications = isOnlyWhitespace && currentGroup && nextParte && (nextParte.added || nextParte.removed);
-
-                    if (parte.added || parte.removed) {
-                        if (!currentGroup) currentGroup = { del: "", add: "" };
-                        if (parte.added) currentGroup.add += parte.value;
-                        if (parte.removed) currentGroup.del += parte.value;
-                    } else if (isBetweenModifications) {
-                        currentGroup.add += parte.value;
-                        currentGroup.del += parte.value;
-                    } else {
-                        if (currentGroup) {
-                            gruppiInterattivi.push({ type: 'mod', ...currentGroup });
-                            currentGroup = null;
-                        }
-                        gruppiInterattivi.push({ type: 'eq', value: parte.value });
-                    }
-                }
-                if (currentGroup) gruppiInterattivi.push({ type: 'mod', ...currentGroup });
-
-                // GENERAZIONE HTML
-                let htmlOutput = "";
-                let paroleAggiunte = 0;
-                let paroleRimosse = 0;
-
-                gruppiInterattivi.forEach(blocco => {
-                    if (blocco.type === 'eq') {
-                        htmlOutput += escapeHtml(blocco.value);
-                    } else {
-                        let delHtml = escapeHtml(blocco.del);
-                        let addHtml = escapeHtml(blocco.add);
-                        
-                        if(blocco.add) paroleAggiunte += blocco.add.trim().split(/\s+/).filter(w=>w).length;
-                        if(blocco.del) paroleRimosse += blocco.del.trim().split(/\s+/).filter(w=>w).length;
-
-                        // Se è stata solo rimossa una parte, applichiamo la logica di invisibilità in "Vista Pulita"
-                        if (blocco.del && !blocco.add) {
-                            htmlOutput += `<span class="diff-group"><span class="del">${delHtml}</span></span>`;
-                        } else {
-                            let tooltip = "Modifica: clicca per espandere i dettagli";
-                            htmlOutput += `<span class="diff-group" onclick="this.classList.toggle('show-detail')" title="${tooltip}">`;
-                            if (blocco.del) htmlOutput += `<span class="del">${delHtml}</span>`;
-                            if (blocco.add) htmlOutput += `<span class="add">${addHtml}</span>`;
-                            htmlOutput += `</span>`;
-                        }
-                    }
-                });
-
-                document.getElementById('documentView').innerHTML = htmlOutput;
-                document.getElementById('summaryBar').innerHTML = `<span style="color: var(--add-color)">+${paroleAggiunte} parole aggiunte</span> &nbsp;|&nbsp; <span style="color: var(--del-color)">-${paroleRimosse} parole rimosse</span>`;
+                const testoOrig = await extractTextFromFile(fileOrig);
+                const testoMod = await extractTextFromFile(fileMod);
                 
-                document.getElementById('docHeader').style.display = "flex";
-                document.getElementById('diffContainer').style.display = "flex";
-                document.getElementById('diffContainer').style.justifyContent = "center";
-                document.getElementById('summaryBar').style.display = "block";
-                document.getElementById('exportBtn').style.display = "block";
-
+                eseguiDiff(testoOrig, testoMod, fileOrig.name, fileMod.name);
             } catch (error) {
                 console.error(error);
-                alert("Si è verificato un errore durante l'elaborazione.");
+                alert("Si è verificato un errore durante l'elaborazione dei file.");
             } finally {
                 btnGenera.disabled = false;
-                btnGenera.innerText = "Analizza";
+                btnGenera.innerText = "Analizza File";
             }
         }
 
+        function analizzaDaTesto() {
+            const testoOrig = document.getElementById('textOriginale').value;
+            const testoMod = document.getElementById('textModificato').value;
+
+            if (!testoOrig.trim() || !testoMod.trim()) {
+                alert("Per favore, inserisci del testo in entrambi i campi.");
+                return;
+            }
+
+            chiudiModale();
+            eseguiDiff(testoOrig, testoMod, "Testo Appunti 1", "Testo Appunti 2");
+        }
+
+
+        // --- MOTORE PRINCIPALE DI COMPARAZIONE ---
+        function eseguiDiff(testoOriginale, testoModificato, nomeOrig, nomeMod) {
+            
+            document.getElementById('nomeOriginale').innerText = nomeOrig;
+            document.getElementById('nomeModificato').innerText = nomeMod;
+
+            differenzeGlobali = Diff.diffWordsWithSpace(testoOriginale, testoModificato);
+
+            let gruppiInterattivi = [];
+            let currentGroup = null;
+
+            // SMART MERGE
+            for (let i = 0; i < differenzeGlobali.length; i++) {
+                let parte = differenzeGlobali[i];
+                let isOnlyWhitespace = !parte.added && !parte.removed && parte.value.trim() === '';
+                let nextParte = differenzeGlobali[i+1];
+                let isBetweenModifications = isOnlyWhitespace && currentGroup && nextParte && (nextParte.added || nextParte.removed);
+
+                if (parte.added || parte.removed) {
+                    if (!currentGroup) currentGroup = { del: "", add: "" };
+                    if (parte.added) currentGroup.add += parte.value;
+                    if (parte.removed) currentGroup.del += parte.value;
+                } else if (isBetweenModifications) {
+                    currentGroup.add += parte.value;
+                    currentGroup.del += parte.value;
+                } else {
+                    if (currentGroup) {
+                        gruppiInterattivi.push({ type: 'mod', ...currentGroup });
+                        currentGroup = null;
+                    }
+                    gruppiInterattivi.push({ type: 'eq', value: parte.value });
+                }
+            }
+            if (currentGroup) gruppiInterattivi.push({ type: 'mod', ...currentGroup });
+
+            // GENERAZIONE HTML
+            let htmlOutput = "";
+            let paroleAggiunte = 0;
+            let paroleRimosse = 0;
+
+            gruppiInterattivi.forEach(blocco => {
+                if (blocco.type === 'eq') {
+                    htmlOutput += escapeHtml(blocco.value);
+                } else {
+                    let delHtml = escapeHtml(blocco.del);
+                    let addHtml = escapeHtml(blocco.add);
+                    
+                    if(blocco.add) paroleAggiunte += blocco.add.trim().split(/\s+/).filter(w=>w).length;
+                    if(blocco.del) paroleRimosse += blocco.del.trim().split(/\s+/).filter(w=>w).length;
+
+                    if (blocco.del && !blocco.add) {
+                        htmlOutput += `<span class="diff-group"><span class="del">${delHtml}</span></span>`;
+                    } else {
+                        let tooltip = "Modifica: clicca per espandere i dettagli";
+                        htmlOutput += `<span class="diff-group" onclick="this.classList.toggle('show-detail')" title="${tooltip}">`;
+                        if (blocco.del) htmlOutput += `<span class="del">${delHtml}</span>`;
+                        if (blocco.add) htmlOutput += `<span class="add">${addHtml}</span>`;
+                        htmlOutput += `</span>`;
+                    }
+                }
+            });
+
+            document.getElementById('documentView').innerHTML = htmlOutput;
+            document.getElementById('summaryBar').innerHTML = `<span style="color: var(--add-color)">+${paroleAggiunte} parole aggiunte</span> &nbsp;|&nbsp; <span style="color: var(--del-color)">-${paroleRimosse} parole rimosse</span>`;
+            
+            document.getElementById('docHeader').style.display = "flex";
+            document.getElementById('diffContainer').style.display = "flex";
+            document.getElementById('diffContainer').style.justifyContent = "center";
+            document.getElementById('summaryBar').style.display = "block";
+            document.getElementById('exportBtn').style.display = "block";
+            
+            // Ripristina la Vista Pulita di default
+            setViewMode('clean');
+        }
+
+        // --- ESPORTAZIONE WORD ---
         async function esportaWord() {
             if (!differenzeGlobali) return;
 
